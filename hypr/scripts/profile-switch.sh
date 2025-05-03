@@ -1,19 +1,19 @@
 #!/bin/bash
 
-# Switch to next profile
-asusctl profile -n
-sleep 0.3
-
-# Get current profile
-profile=$(asusctl profile -p | grep -oP "Active profile is \K.*")
-
-# Choose icon
-case "$profile" in
-  Performance) icon="🚀" ;;
-  Balanced)    icon="🌗" ;;
-  Quiet)       icon="🌙" ;;
-  *)           icon="󰾆" ;;
-esac
-
-notify-send "$icon Profile: $profile"
+gdbus monitor \
+  --system \
+  --dest net.hadess.PowerProfiles \
+  --object-path /net/hadess/PowerProfiles \
+| while read -r line; do
+    if [[ "$line" == *"ActiveProfile"* ]]; then
+        profile=$(asusctl profile -p | grep -oP "Active profile is \K.*")
+	case "$profile" in
+  	    Performance) icon="🚀" ;;
+  	    Balanced)    icon="🌗" ;;
+  	    Quiet)       icon="🌙" ;;
+  	    *)           icon="󰾆" ;;
+	esac
+	notify-send "$icon Profile: $profile"
+    fi
+done
 
